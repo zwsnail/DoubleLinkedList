@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DoublyLinkedListWithErrors
 {
-   public class DLList
+      public class DLList
     {
         public DLLNode head; // pointer to the head of the list
         public DLLNode tail; // pointer to the tail of the list
@@ -27,10 +27,46 @@ namespace DoublyLinkedListWithErrors
             else
             {
                 tail.next = p;
-                tail = p;
+                //tail = p;      // bug2: first p.previous = tail and then tail = p
+                //p.previous = tail;
                 p.previous = tail;
+                tail = p;
             }
         } // end of addToTail
+
+
+        /*-------------------------------------------------
+         * Return null if the string does not exist.
+         * ----------------------------------------------*/
+        public DLLNode search(int num)
+        {
+            DLLNode p = head;
+            while (p != null)
+            {
+                //p = p.next;  // bug3: if (p.num == num) break first and then if (p.num == num) break;
+                //if (p.num == num) break;
+                if (p.num == num) break;
+                p = p.next;
+            }
+            return (p);
+        } // end of search (return pointer to the node);
+
+
+
+        public int total()
+        {
+            DLLNode p = head;
+            int tot = 0;
+            while (p != null)
+            {
+                //tot += p.num; // bug4: p = p.next.next should be p = p.next
+                //p = p.next.next;
+                tot += p.num;
+                p = p.next;
+            }
+            return (tot);
+        } // end of total
+
 
         public void addToHead(DLLNode p)
         {
@@ -47,40 +83,20 @@ namespace DoublyLinkedListWithErrors
             }
         } // end of addToHead
 
-        public void removHead()
-        {
-            if (this.head == null) return;
-            this.head = this.head.next;
-            this.head.previous = null;
-        } // removeHead
-
-        public void removeTail()
-        {
-            if (this.tail == null) return;
-            if (this.head == this.tail)
-            {
-                this.head = null;
-                this.tail = null;
-                return;
-            }
-        } // remove tail
-
-        /*-------------------------------------------------
-         * Return null if the string does not exist.
-         * ----------------------------------------------*/
-        public DLLNode search(int num)
-        {
-            DLLNode p = head;
-            while (p != null)
-            {
-                p = p.next;
-                if (p.num == num) break;
-            }
-            return (p);
-        } // end of search (return pionter to the node);
 
         public void removeNode(DLLNode p)
         { // removing the node p.
+
+            // bug5: need to look for the position of p in the list first
+            // ==========================================================
+            DLLNode searchP = this.head;
+            while (searchP != null)
+            {
+                if (searchP == p) break;
+                searchP = searchP.next;
+            }
+            if (searchP == null) return;
+            // ==========================================================
 
             if (p.next == null)
             {
@@ -103,16 +119,51 @@ namespace DoublyLinkedListWithErrors
             return;
         } // end of remove a node
 
-        public int total()
+
+
+        public void removeHead()
         {
-            DLLNode p = head;
-            int tot = 0;
-            while (p != null)
+            // bug6: only applied for two nodes and more in the list
+            //if (this.head == null) return;
+            //this.head = this.head.next;
+            //this.head.previous = null;
+            if (head == null)
+                throw new InvalidOperationException("Cannot remove head from an empty list.");
+            if (head.next == null) // this.head == this.tail
             {
-                tot += p.num;
-                p = p.next.next;
+                // list only has one node
+                head = tail = null;
             }
-            return (tot);
-        } // end of total
+            else
+            {
+                head = head.next;
+                head.previous = null;
+            }
+        } // removeHead
+
+        public void removeTail()
+        {
+            // bug7: only applied for one node and non-node in the list
+            //if (this.tail == null) return;
+            //if (this.head == this.tail)
+            //{
+            //    this.head = null;
+            //    this.tail = null;
+            //    return;
+            //}
+            if (this.tail == null) throw new InvalidOperationException("Cannot remove tail from an empty list."); 
+            if (this.head == this.tail)
+            {
+                this.head = null;
+                this.tail = null;
+                return;
+            }
+            else
+            {
+                tail = tail.previous;
+                tail.next = null;
+            }
+
+        } // remove tail
     } // end of DLList class
 }
